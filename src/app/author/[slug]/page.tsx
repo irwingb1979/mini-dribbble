@@ -8,6 +8,25 @@ function urlFor(source: SanityImageSource) {
   return builder.image(source)
 }
 
+// Define TypeScript interfaces for the data
+interface Shot {
+  _id: string
+  title: string
+  slug: { current: string }
+  image: SanityImageSource
+  likes: number
+  views: number
+}
+
+interface Author {
+  _id: string
+  name: string
+  avatar: SanityImageSource
+  website: string
+  minibio: string
+  shots: Shot[]
+}
+
 const AUTHOR_QUERY = `*[_type == "author" && slug.current == $slug][0]{
   _id,
   name,

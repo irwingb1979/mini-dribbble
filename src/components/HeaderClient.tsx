@@ -6,10 +6,11 @@ import { IoMdAdd } from "react-icons/io";
 import Modal from "./Modal";
 import imageUrlBuilder from "@sanity/image-url";
 import { client } from "@/sanity/client";
+import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 interface Author {
   name: string;
-  avatar: any;
+  avatar: SanityImageSource; // Updated type for avatar
   slug: { current: string };
 }
 

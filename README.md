@@ -7,7 +7,7 @@ This project lets you explore how to build a portfolio/gallery app with dynamic 
 
 ## 🚀 Demo
 
-**Live Demo**: [Demo](https://)
+**Live Demo**: [Demo](https://mini-dribbble.onrender.com)
  
 ---
 
