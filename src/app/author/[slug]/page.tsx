@@ -67,7 +67,7 @@ export default async function AuthorPage({ params }: { params: { slug: string } 
       {/* Shots grid */}
       <h2 className="mb-4 text-xl font-semibold">Shots</h2>
       <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {author.shots.map((shot: any) => (
+        {author.shots.map((shot: Shot) => (
           <li key={shot._id} className="rounded-lg shadow-md overflow-hidden">
             <a href={`/${shot.slug.current}`}>
               <img
