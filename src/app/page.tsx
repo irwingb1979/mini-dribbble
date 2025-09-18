@@ -1,103 +1,102 @@
-import Image from "next/image";
+import Link from "next/link";
+import { type SanityDocument } from "next-sanity";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { client } from "@/sanity/client";
 
-export default function Home() {
+import { IoHeart } from "react-icons/io5";
+import { IoMdEye } from "react-icons/io";
+
+import Modal from "@/components/Modal";
+
+const POSTS_QUERY = `*[
+  _type == "shot"
+  && defined(slug.current)
+]|order(publishedAt desc)[0...12]{_id, title, slug, author->{name, avatar, slug}, likes, views, image}`;
+
+const options = { next: { revalidate: 30 } };
+
+export default async function IndexPage() {
+  const posts = await client.fetch<SanityDocument[]>(POSTS_QUERY, {}, options);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <>
+      <main className="container mx-auto min-h-screen px-4 py-8">
+        <div className="menu mb-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Recent Shots</h1>
+          <nav className="space-x-4">
+            <Link href="/" className="text-gray-600 hover:text-gray-800">Recent</Link>
+            <Link href="/popular" className="text-gray-600 hover:text-gray-800">Popular</Link>
+            <Link href="/authors" className="text-gray-600 hover:text-gray-800">Authors</Link>
+          </nav>
         </div>
+        <ul className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <li className="hover:underline" key={post._id}>
+              <Link href={`/${post.slug.current}`} className="relative group w-full overflow-hidden rounded-xl shadow-lg">
+                {/* Shot image */}
+                <img
+                  className="mb-4 h-auto w-full rounded-lg"
+                  src={imageUrlBuilder(client)
+                    .image(post.image as SanityImageSource)
+                    .width(800)
+                    .url()}
+                  alt={post.title ?? "Post image"}
+                />
+
+                {/* Title overlay (hidden until hover) */}
+                <div
+                  className="absolute inset-0 flex items-center justify-center rounded-lg 
+             bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-4"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Title */}
+                    <h3 className="text-lg font-semibold text-white drop-shadow">
+                      {post.title}
+                    </h3>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        className="rounded-full bg-white/20 p-2 text-white transition hover:bg-pink-500 hover:text-white"
+                        aria-label="Like"
+                      >
+                        <IoHeart size={18} />
+                      </button>
+                      <button
+                        className="rounded-full bg-white/20 p-2 text-white transition hover:bg-blue-500 hover:text-white"
+                        aria-label="View">
+                        <IoMdEye size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Shot details */}
+              <div className="shot-details mt-2 text-sm text-gray-600 flex gap-2 justify-between">
+                <div className="user-information flex-1">
+                  <Link href={`/author/${post.author.slug.current}`}>
+                    <img src={imageUrlBuilder(client).image(post.author.avatar).url()} alt={post.author.name}
+                      className="inline-block h-6 w-6 rounded-full" /> {post.author.name}
+                  </Link>
+                </div>
+                <div className="shot-statistics-container flex gap-2">
+                  <div className="shot-statistic likes-container flex gap-1 items-center">
+                    <div><IoHeart /></div>
+                    <div>{post.likes ?? 0}</div>
+                  </div>
+                  <div className="shot-statistic views-container flex gap-1 items-center">
+                    <div><IoMdEye /></div>
+                    <div>{post.views ?? 0}</div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+    </>
   );
 }
