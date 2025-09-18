@@ -7,7 +7,6 @@ import { client } from "@/sanity/client";
 import { IoHeart } from "react-icons/io5";
 import { IoMdEye } from "react-icons/io";
 
-import Modal from "@/components/Modal";
 
 const POSTS_QUERY = `*[
   _type == "shot"

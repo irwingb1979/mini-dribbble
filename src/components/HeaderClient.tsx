@@ -7,7 +7,13 @@ import Modal from "./Modal";
 import imageUrlBuilder from "@sanity/image-url";
 import { client } from "@/sanity/client";
 
-export default function HeaderClient({ author }: { author: any }) {
+interface Author {
+  name: string;
+  avatar: any;
+  slug: { current: string };
+}
+
+export default function HeaderClient({ author }: { author: Author }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
